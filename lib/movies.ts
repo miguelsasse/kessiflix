@@ -18,7 +18,8 @@ export interface Media {
 /* ------------------------------- FILMES -------------------------------- */
 
 export const MOVIE_CATEGORIES = [
-  'Romance & Suspense',
+  'Suspense & Mistério',
+  'Romance',
   'Comédia',
   'Terror',
   'Ficção Científica',
@@ -27,27 +28,78 @@ export const MOVIE_CATEGORIES = [
 ] as const
 
 export const MOVIES: Media[] = [
-  // Romance & Suspense
+  // Suspense & Mistério
   {
-    id: 'gxfOSIJXN-M',
-    title: 'Charada',
-    meta: '1963 · Romance · Suspense',
-    synopsis: 'Uma viúva descobre que o marido escondia uma fortuna — e vários homens a perseguem por ela. Cary Grant e Audrey Hepburn no auge.',
-    category: 'Romance & Suspense',
+    id: 'ydCqPEoQ-jI',
+    title: 'E Não Sobrou Nenhum',
+    meta: '1945 · Mistério · Agatha Christie',
+    synopsis: 'Dez estranhos são atraídos a uma ilha isolada e, um a um, começam a ser mortos seguindo uma macabra cantiga infantil. O mistério mais famoso de Agatha Christie.',
+    category: 'Suspense & Mistério',
+  },
+  {
+    id: 'Q-iglYhLl-8',
+    title: 'O Estranho',
+    meta: '1946 · Noir · Orson Welles',
+    synopsis: 'Um investigador caça um criminoso de guerra escondido numa cidadezinha pacata — casado com uma jovem que não faz ideia de quem ele é. Com Orson Welles e Edward G. Robinson.',
+    category: 'Suspense & Mistério',
+  },
+  {
+    id: 'X5Q5hBTSuH0',
+    title: 'O Carona da Morte',
+    meta: '1953 · Thriller · Ida Lupino',
+    synopsis: 'Dois amigos numa pescaria pegam um carona — um psicopata que os mantém reféns numa viagem de pesadelo pelo deserto. Tensão pura, do início ao fim.',
+    category: 'Suspense & Mistério',
+  },
+  {
+    id: 'tQ9HYSeKzyg',
+    title: 'A Dama Oculta',
+    meta: '1938 · Mistério · Hitchcock',
+    synopsis: 'Uma senhora simpática desaparece de um trem em movimento — e todos os passageiros juram que ela nunca existiu. Hitchcock no auge do suspense.',
+    category: 'Suspense & Mistério',
+  },
+  {
+    id: 'Gpn49rUuOGU',
+    title: 'O Gabinete do Dr. Caligari',
+    meta: '1920 · Psicológico · Mudo',
+    synopsis: 'Um hipnotizador usa um sonâmbulo para cometer assassinatos. O marco do horror psicológico, com um dos maiores plot twists da história do cinema (legendado).',
+    category: 'Suspense & Mistério',
+  },
+  {
+    id: 'vksXfkk0C7M',
+    title: 'Demência 13',
+    meta: '1963 · Thriller · Coppola',
+    synopsis: 'Uma família amaldiçoada, segredos afogados num lago e um assassino de machado à solta. O primeiro suspense de Francis Ford Coppola, antes de O Poderoso Chefão.',
+    category: 'Suspense & Mistério',
+  },
+  {
+    id: 'kJwvDAlDQRs',
+    title: 'A Morte num Beijo (D.O.A.)',
+    meta: '1950 · Noir',
+    synopsis: 'Um homem descobre que foi envenenado e tem poucas horas de vida — então corre contra o tempo pra descobrir quem o matou, e por quê. Premissa de tirar o fôlego.',
+    category: 'Suspense & Mistério',
   },
   {
     id: 'jfVtoPN3BVk',
     title: 'Os 39 Degraus',
     meta: '1935 · Suspense · Hitchcock',
     synopsis: 'Um homem comum é arrastado a uma rede de espionagem e foge pela Escócia algemado a uma desconhecida. Clássico de Alfred Hitchcock (legendado).',
-    category: 'Romance & Suspense',
+    category: 'Suspense & Mistério',
   },
   {
     id: 'QqBPGnSXF8Q',
     title: 'Desvio (Detour)',
     meta: '1945 · Noir',
-    synopsis: 'Um pianista pega carona rumo a Hollywood e se afunda numa espiral de azar e chantagem. O noir mais sombrio e barato já feito (legendado).',
-    category: 'Romance & Suspense',
+    synopsis: 'Um pianista pega carona rumo a Hollywood e se afunda numa espiral de azar e chantagem. O noir mais sombrio e claustrofóbico já feito (legendado).',
+    category: 'Suspense & Mistério',
+  },
+
+  // Romance
+  {
+    id: 'gxfOSIJXN-M',
+    title: 'Charada',
+    meta: '1963 · Romance · Suspense',
+    synopsis: 'Uma viúva descobre que o marido escondia uma fortuna — e vários homens a perseguem por ela. Cary Grant e Audrey Hepburn no auge.',
+    category: 'Romance',
   },
 
   // Comédia
@@ -56,7 +108,7 @@ export const MOVIES: Media[] = [
     title: 'Jejum de Amor',
     meta: '1940 · Comédia romântica',
     synopsis: 'Um editor tenta reconquistar a ex-esposa, sua melhor repórter, na véspera do casamento dela com outro. Diálogos afiadíssimos.',
-    category: 'Comédia',
+    category: 'Romance',
   },
   {
     id: 'uxfslt0hIX8',
