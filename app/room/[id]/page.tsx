@@ -6,7 +6,8 @@ import { useWebRTC } from '@/hooks/useWebRTC'
 import VideoPlayer from '@/components/VideoPlayer'
 import CallBubble from '@/components/CallBubble'
 import Reactions from '@/components/Reactions'
-import { Copy, Check, Film, Loader2, UserX, Link2 } from 'lucide-react'
+import MoviePicker from '@/components/MoviePicker'
+import { Copy, Check, Film, Loader2, UserX, Link2, Clapperboard } from 'lucide-react'
 
 export default function RoomPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: roomId } = use(params)
@@ -14,6 +15,8 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
   const [copied, setCopied] = useState(false)
   const [inputUrl, setInputUrl] = useState('')
   const [showUrlInput, setShowUrlInput] = useState(false)
+  const [showLinkField, setShowLinkField] = useState(false)
+  const [showMovies, setShowMovies] = useState(false)
   const [localReactions, setLocalReactions] = useState<string[]>([])
 
   const {
@@ -46,6 +49,13 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
     if (!url) return
     sendVideoUrl(url)
     setInputUrl('')
+    setShowUrlInput(false)
+    setShowLinkField(false)
+  }
+
+  function handlePickMovie(url: string) {
+    sendVideoUrl(url)
+    setShowMovies(false)
     setShowUrlInput(false)
   }
 
@@ -125,39 +135,75 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
                 onPause={handlePause}
               />
             ) : (
-              /* No video yet — show input */
-              <div className="w-full h-full flex flex-col items-center justify-center gap-5 px-5 text-zinc-500">
-                <Film size={52} className="opacity-20" />
-                <p className="text-sm text-center">Cole um link do YouTube para começar</p>
-                <div className="flex gap-2 w-full max-w-sm">
-                  <input
-                    value={inputUrl}
-                    onChange={e => setInputUrl(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleSetVideo()}
-                    placeholder="youtube.com/watch?v=..."
-                    autoCapitalize="none"
-                    autoCorrect="off"
-                    className="flex-1 bg-zinc-900 border border-zinc-800 rounded-2xl px-4 py-4 text-white placeholder-zinc-600 focus:outline-none focus:border-rose-600"
-                  />
+              /* No video yet — escolher filme OU colar link */
+              <div className="w-full h-full flex flex-col items-center justify-center gap-6 px-6 text-zinc-400">
+                <div className="text-center">
+                  <Film size={52} className="opacity-20 mx-auto mb-3" />
+                  <p className="text-base font-medium text-zinc-300">O que vamos assistir?</p>
+                </div>
+
+                <div className="flex flex-col gap-3 w-full max-w-sm">
+                  {/* Escolher filme do catálogo */}
                   <button
-                    onClick={handleSetVideo}
-                    className="px-4 py-4 bg-rose-600 active:bg-rose-500 rounded-2xl font-medium"
+                    onClick={() => setShowMovies(true)}
+                    className="flex items-center justify-center gap-2 py-4 bg-rose-600 active:bg-rose-500 rounded-2xl font-semibold text-white"
                   >
-                    ▶
+                    <Clapperboard size={20} />
+                    Escolher filme
                   </button>
+
+                  {/* Colar link do YouTube */}
+                  {!showLinkField ? (
+                    <button
+                      onClick={() => setShowLinkField(true)}
+                      className="flex items-center justify-center gap-2 py-4 bg-zinc-900 border border-zinc-800 active:bg-zinc-800 rounded-2xl font-medium text-zinc-300"
+                    >
+                      <Link2 size={18} />
+                      Colar link do YouTube
+                    </button>
+                  ) : (
+                    <div className="flex gap-2">
+                      <input
+                        value={inputUrl}
+                        onChange={e => setInputUrl(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && handleSetVideo()}
+                        placeholder="youtube.com/watch?v=..."
+                        autoCapitalize="none"
+                        autoCorrect="off"
+                        autoFocus
+                        className="flex-1 bg-zinc-900 border border-zinc-800 rounded-2xl px-4 py-4 text-white placeholder-zinc-600 focus:outline-none focus:border-rose-600"
+                      />
+                      <button
+                        onClick={handleSetVideo}
+                        className="px-5 py-4 bg-rose-600 active:bg-rose-500 rounded-2xl font-medium"
+                      >
+                        ▶
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
 
-            {/* "Trocar vídeo" floating button (when video is playing) */}
+            {/* Botões flutuantes pra trocar de filme (quando algo está tocando) */}
             {videoUrl && (
               <>
-                <button
-                  onClick={() => setShowUrlInput(v => !v)}
-                  className="absolute top-3 right-3 z-10 p-2 bg-black/50 rounded-full backdrop-blur"
-                >
-                  <Link2 size={16} className="text-white/70" />
-                </button>
+                <div className="absolute top-3 right-3 z-10 flex gap-2">
+                  <button
+                    onClick={() => setShowMovies(true)}
+                    className="p-2 bg-black/50 rounded-full backdrop-blur"
+                    aria-label="Escolher filme"
+                  >
+                    <Clapperboard size={16} className="text-white/70" />
+                  </button>
+                  <button
+                    onClick={() => setShowUrlInput(v => !v)}
+                    className="p-2 bg-black/50 rounded-full backdrop-blur"
+                    aria-label="Colar link"
+                  >
+                    <Link2 size={16} className="text-white/70" />
+                  </button>
+                </div>
 
                 {showUrlInput && (
                   <div className="absolute top-12 right-3 left-3 z-10 flex gap-2">
@@ -202,6 +248,11 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
           onToggleVideo={toggleVideo}
           onEnd={endCall}
         />
+      )}
+
+      {/* Catálogo de filmes */}
+      {showMovies && (
+        <MoviePicker onSelect={handlePickMovie} onClose={() => setShowMovies(false)} />
       )}
     </main>
   )
