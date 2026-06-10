@@ -32,11 +32,9 @@ export default function Home() {
         um cinema particular
       </p>
 
-      {/* logo */}
-      <div className="animate-rise flex flex-col items-center gap-2 mb-3" style={{ animationDelay: '0.1s' }}>
-        <h1 className="font-display text-6xl leading-none tracking-tight">
-          <span className="text-gilt">Kessi</span><span className="text-rose-500 italic">FLIX</span>
-        </h1>
+      {/* logo — padrão Netflix */}
+      <div className="animate-rise flex flex-col items-center mb-4" style={{ animationDelay: '0.1s' }}>
+        <h1 className="logo-netflix text-7xl">KEssiFLIX</h1>
       </div>
 
       {/* assinatura pra ela */}

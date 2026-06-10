@@ -88,8 +88,7 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-3 border-b border-white/5 shrink-0">
         <div className="flex items-center gap-2">
-          <Film size={16} className="text-rose-500" />
-          <span className="font-display text-base tracking-tight"><span className="text-gilt">Kessi</span><span className="text-rose-500 italic">FLIX</span></span>
+          <span className="logo-netflix-sm text-2xl leading-none">KEssiFLIX</span>
           <span className="text-zinc-600 text-xs font-mono ml-1">{roomId}</span>
         </div>
         <button
