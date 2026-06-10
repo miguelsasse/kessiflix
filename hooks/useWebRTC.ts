@@ -2,12 +2,27 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { getSocket } from '@/lib/socket'
 
-// Multiple STUN servers for better connectivity across different networks/cities
+// STUN descobre o IP público; TURN faz a ponte quando o P2P direto falha
+// (essencial quando os dois estão em redes/cidades diferentes).
 const ICE_SERVERS: RTCIceServer[] = [
   { urls: 'stun:stun.l.google.com:19302' },
   { urls: 'stun:stun1.l.google.com:19302' },
-  { urls: 'stun:stun2.l.google.com:19302' },
-  { urls: 'stun:stun3.l.google.com:19302' },
+  // TURN públicos gratuitos (OpenRelay / Metered)
+  {
+    urls: 'turn:openrelay.metered.ca:80',
+    username: 'openrelayproject',
+    credential: 'openrelayproject',
+  },
+  {
+    urls: 'turn:openrelay.metered.ca:443',
+    username: 'openrelayproject',
+    credential: 'openrelayproject',
+  },
+  {
+    urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+    username: 'openrelayproject',
+    credential: 'openrelayproject',
+  },
 ]
 
 interface UseWebRTCProps {
@@ -21,39 +36,67 @@ export function useWebRTC({ roomId, partnerSocketId, isInitiator }: UseWebRTCPro
   const remoteVideoRef = useRef<HTMLVideoElement>(null)
   const peerRef = useRef<RTCPeerConnection | null>(null)
   const localStreamRef = useRef<MediaStream | null>(null)
+
   const [callActive, setCallActive] = useState(false)
   const [audioMuted, setAudioMuted] = useState(false)
   const [videoMuted, setVideoMuted] = useState(false)
   const [callError, setCallError] = useState<string | null>(null)
 
-  // Get socket directly — avoids the stale null ref from useRoom
+  // Guardamos os streams em state — assim um useEffect liga o srcObject
+  // DEPOIS que o elemento <video> existe na tela (corrige o "vídeo não aparece").
+  const [localStream, setLocalStream] = useState<MediaStream | null>(null)
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null)
+
   const socketRef = useRef(getSocket())
+
+  // Liga o stream LOCAL ao elemento assim que ambos existirem
+  useEffect(() => {
+    const el = localVideoRef.current
+    if (callActive && el && localStream && el.srcObject !== localStream) {
+      el.srcObject = localStream
+      el.play?.().catch(() => {})
+    }
+  }, [callActive, localStream])
+
+  // Liga o stream REMOTO ao elemento assim que ambos existirem
+  useEffect(() => {
+    const el = remoteVideoRef.current
+    if (callActive && el && remoteStream && el.srcObject !== remoteStream) {
+      el.srcObject = remoteStream
+      el.play?.().catch(() => {})
+    }
+  }, [callActive, remoteStream])
 
   function createPeer(onIceCandidate: (candidate: RTCIceCandidate) => void): RTCPeerConnection {
     const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS })
+
+    // Recebe a mídia do parceiro → guarda em state (effect acima exibe)
     pc.ontrack = (e) => {
-      if (remoteVideoRef.current) remoteVideoRef.current.srcObject = e.streams[0]
+      setRemoteStream(e.streams[0])
     }
     pc.onicecandidate = (e) => {
       if (e.candidate) onIceCandidate(e.candidate)
     }
     pc.onconnectionstatechange = () => {
-      if (pc.connectionState === 'failed') setCallActive(false)
+      if (pc.connectionState === 'failed' || pc.connectionState === 'closed') {
+        // não derruba a UI; deixa o usuário tentar de novo
+      }
     }
     return pc
   }
 
   async function getLocalStream(): Promise<MediaStream | null> {
+    if (localStreamRef.current) return localStreamRef.current
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
       localStreamRef.current = stream
-      if (localVideoRef.current) localVideoRef.current.srcObject = stream
+      setLocalStream(stream)
       return stream
-    } catch (err: any) {
-      // Camera/mic blocked or unavailable (common on HTTP on mobile)
-      const msg = err?.name === 'NotAllowedError'
-        ? 'Permissão de câmera negada'
-        : 'Câmera não disponível'
+    } catch (err) {
+      const name = (err as DOMException)?.name
+      const msg = name === 'NotAllowedError'
+        ? 'Permita o acesso à câmera e ao microfone'
+        : 'Câmera/microfone indisponível'
       setCallError(msg)
       return null
     }
@@ -62,6 +105,9 @@ export function useWebRTC({ roomId, partnerSocketId, isInitiator }: UseWebRTCPro
   const startCall = useCallback(async () => {
     const socket = socketRef.current
     if (!socket || !partnerSocketId) return
+
+    setCallActive(true)   // renderiza os <video> ANTES de a mídia chegar
+    setCallError(null)
 
     const stream = await getLocalStream()
     if (!stream) return
@@ -85,20 +131,19 @@ export function useWebRTC({ roomId, partnerSocketId, isInitiator }: UseWebRTCPro
         to: partnerSocketId,
       })
     }
-
-    setCallActive(true)
-    setCallError(null)
   }, [partnerSocketId, roomId, isInitiator])
 
-  // Listen for WebRTC signals (always active, no socket null issue)
+  // Recebe sinais do parceiro (sempre ativo)
   useEffect(() => {
     const socket = socketRef.current
 
-    const handleSignal = async ({ signal, from }: { signal: any; from: string }) => {
+    const handleSignal = async ({ signal, from }: { signal: { type: string; sdp?: RTCSessionDescriptionInit; candidate?: RTCIceCandidateInit }; from: string }) => {
       let pc = peerRef.current
 
-      // Non-initiator: create peer on first signal received
+      // Quem recebe primeiro um sinal cria o peer e abre a câmera
       if (!pc) {
+        setCallActive(true)
+        setCallError(null)
         const stream = await getLocalStream()
         if (!stream) return
 
@@ -110,12 +155,10 @@ export function useWebRTC({ roomId, partnerSocketId, isInitiator }: UseWebRTCPro
           })
         })
         peerRef.current = pc
-        stream.getTracks().forEach(t => pc!.addTrack(t, stream!))
-        setCallActive(true)
-        setCallError(null)
+        stream.getTracks().forEach(t => pc!.addTrack(t, stream))
       }
 
-      if (signal.type === 'offer') {
+      if (signal.type === 'offer' && signal.sdp) {
         await pc.setRemoteDescription(new RTCSessionDescription(signal.sdp))
         const answer = await pc.createAnswer()
         await pc.setLocalDescription(answer)
@@ -124,9 +167,9 @@ export function useWebRTC({ roomId, partnerSocketId, isInitiator }: UseWebRTCPro
           signal: { type: 'answer', sdp: answer },
           to: from,
         })
-      } else if (signal.type === 'answer') {
+      } else if (signal.type === 'answer' && signal.sdp) {
         await pc.setRemoteDescription(new RTCSessionDescription(signal.sdp))
-      } else if (signal.type === 'ice') {
+      } else if (signal.type === 'ice' && signal.candidate) {
         try { await pc.addIceCandidate(new RTCIceCandidate(signal.candidate)) } catch {}
       }
     }
@@ -150,6 +193,8 @@ export function useWebRTC({ roomId, partnerSocketId, isInitiator }: UseWebRTCPro
     peerRef.current = null
     localStreamRef.current?.getTracks().forEach(t => t.stop())
     localStreamRef.current = null
+    setLocalStream(null)
+    setRemoteStream(null)
     if (localVideoRef.current) localVideoRef.current.srcObject = null
     if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null
     setCallActive(false)
