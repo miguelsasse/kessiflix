@@ -4,10 +4,12 @@ services:
     env: node
     region: oregon
     plan: free
-    buildCommand: npm install && npm run build
+    # --include=dev garante que typescript/tailwind/tipos (devDependencies)
+    # sejam instalados — o build do Next precisa deles.
+    buildCommand: npm install --include=dev && npm run build
     startCommand: npm start
     envVars:
-      - key: NODE_ENV
-        value: production
+      # NODE_ENV só vira "production" no runtime (via script "npm start"),
+      # nunca durante o install/build, senão as devDependencies somem.
       - key: NODE_VERSION
         value: 20.11.0
