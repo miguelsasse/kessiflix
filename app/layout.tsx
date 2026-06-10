@@ -4,7 +4,12 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "KEssiFLIX",
   description: "Assista juntos — mesmo estando longe.",
+  manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "KEssiFLIX" },
+  icons: {
+    icon: "/favicon.png",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
