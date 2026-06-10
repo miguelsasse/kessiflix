@@ -91,11 +91,19 @@ export default function VideoPlayer({ videoUrl, playing, seekTime, onPlay, onPau
           playsinline: 1,    // Prevent fullscreen auto on iOS
           fs: 1,
           iv_load_policy: 3,
+          cc_load_policy: 1,    // Liga legendas por padrão
+          cc_lang_pref: 'pt',   // Prefere legenda em português
+          hl: 'pt',
           origin: window.location.origin,
         },
         events: {
           onReady: () => {
             isReady.current = true
+            // Tenta forçar legenda em português (auto-tradução do YouTube)
+            try {
+              playerRef.current?.setOption?.('captions', 'reload', true)
+              playerRef.current?.setOption?.('captions', 'track', { languageCode: 'pt' })
+            } catch {}
           },
           onStateChange: (e: any) => {
             if (!isReady.current) return
