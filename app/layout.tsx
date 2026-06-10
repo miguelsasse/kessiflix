@@ -24,6 +24,15 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className="h-full">
+      <head>
+        {/* Fontes elegantes carregadas no cliente (sem dependência de build) */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Cormorant+Garamond:ital,wght@0,500;1,500&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body className="h-full bg-zinc-950 text-white antialiased overscroll-none">
         {children}
       </body>

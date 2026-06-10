@@ -51,15 +51,15 @@ export default function MoviePicker({ onSelect, onClose }: MoviePickerProps) {
             tab === 'kessilin' ? 'bg-rose-600 text-white' : 'bg-zinc-900 text-zinc-400'
           }`}
         >
-          <Sparkles size={15} /> Ms Kessilin
+          <Sparkles size={15} /> Ms Kesselin 🖤
         </button>
       </div>
 
       {/* Conteúdo por categoria */}
       <div className="flex-1 overflow-y-auto px-4 py-4">
         {tab === 'kessilin' && (
-          <p className="text-zinc-500 text-xs mb-4 leading-relaxed">
-            Seleção pra Deise 💛 — história real, curiosidades e conteúdo sem sensacionalismo.
+          <p className="font-serif-soft text-zinc-400 text-sm mb-4 leading-relaxed">
+            Um cantinho só seu, Ms Kesselin 🖤 — história de verdade, curiosidades e aquelas coisas que você ama, sem drama nem sensacionalismo.
           </p>
         )}
 

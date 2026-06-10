@@ -86,51 +86,53 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
     <main className="h-dvh min-h-dvh bg-zinc-950 text-white flex flex-col pt-safe">
 
       {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3 border-b border-zinc-900 shrink-0">
+      <header className="flex items-center justify-between px-4 py-3 border-b border-white/5 shrink-0">
         <div className="flex items-center gap-2">
           <Film size={16} className="text-rose-500" />
-          <span className="font-black text-sm tracking-tight">Kessi<span className="text-rose-500">FLIX</span></span>
-          <span className="text-zinc-600 text-xs font-mono">{roomId}</span>
+          <span className="font-display text-base tracking-tight"><span className="text-gilt">Kessi</span><span className="text-rose-500 italic">FLIX</span></span>
+          <span className="text-zinc-600 text-xs font-mono ml-1">{roomId}</span>
         </div>
         <button
           onClick={copyLink}
           className="flex items-center gap-1.5 text-xs text-zinc-400 active:text-white py-1.5 px-2 rounded-lg"
         >
           {copied ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
-          {copied ? 'Copiado!' : 'Compartilhar'}
+          {copied ? 'Copiado!' : 'Convidar'}
         </button>
       </header>
 
       {/* Waiting state */}
       {(roomState === 'waiting' || roomState === 'connecting') ? (
-        <div className="flex-1 overflow-y-auto flex flex-col items-center justify-center gap-5 px-6 py-6 pb-safe">
-          <Loader2 size={40} className="text-rose-500 animate-spin shrink-0" />
+        <div className="glow-cinema flex-1 overflow-y-auto flex flex-col items-center justify-center gap-5 px-6 py-6 pb-safe relative">
+          <div className="pointer-events-none absolute top-10 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full bg-rose-700/15 blur-[80px] animate-glow" />
+
+          <span className="text-4xl animate-heartbeat">🖤</span>
           <div className="text-center">
-            <p className="text-zinc-200 font-semibold text-lg">Aguardando parceiro(a)...</p>
-            <p className="text-zinc-500 text-sm mt-1">Manda o link da sala pra ela/ele entrar</p>
+            <p className="font-display text-2xl text-gilt leading-snug">Separando o melhor lugar<br/>pra Ms Kesselin…</p>
+            <p className="font-serif-soft text-zinc-400 text-base mt-2">a sessão começa quando você chegar</p>
           </div>
 
           <button
             onClick={copyLink}
-            className="flex items-center gap-2 px-6 py-3.5 bg-rose-600 active:bg-rose-500 rounded-2xl text-sm font-semibold w-full max-w-xs justify-center shrink-0"
+            className="flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-rose-700 to-rose-600 active:from-rose-600 active:to-rose-500 rounded-2xl text-sm font-semibold w-full max-w-xs justify-center shrink-0 shadow-lg shadow-rose-900/30"
           >
             {copied ? <Check size={18} /> : <Copy size={18} />}
-            {copied ? 'Link copiado!' : 'Copiar link da sala'}
+            {copied ? 'Convite copiado 🖤' : 'Mandar o convite'}
           </button>
 
           <p className="text-zinc-700 text-xs font-mono">código: {roomId}</p>
 
           {/* Escolher o filme já enquanto espera */}
           <div className="w-full max-w-xs flex items-center gap-3 pt-2">
-            <div className="flex-1 h-px bg-zinc-800" />
-            <span className="text-zinc-600 text-xs">enquanto isso</span>
-            <div className="flex-1 h-px bg-zinc-800" />
+            <div className="flex-1 h-px bg-white/10" />
+            <span className="text-zinc-500 text-xs font-serif-soft">já vai escolhendo o filme</span>
+            <div className="flex-1 h-px bg-white/10" />
           </div>
 
           {videoUrl ? (
-            <div className="w-full max-w-xs flex flex-col items-center gap-2 bg-zinc-900/60 border border-zinc-800 rounded-2xl p-4">
-              <Check size={20} className="text-green-400" />
-              <p className="text-sm text-zinc-300 text-center">Conteúdo escolhido! Começa assim que ela/ele entrar.</p>
+            <div className="w-full max-w-xs flex flex-col items-center gap-2 bg-white/5 border border-white/10 rounded-2xl p-4">
+              <span className="text-2xl animate-heartbeat">🍿</span>
+              <p className="font-serif-soft text-base text-zinc-200 text-center leading-snug">Filme escolhido. Agora é só você chegar pra começar. 🖤</p>
               <div className="flex gap-2 mt-1">
                 <button onClick={() => setShowMovies(true)} className="text-xs text-rose-400 active:text-rose-300 px-2 py-1">
                   Trocar filme
