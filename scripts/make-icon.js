@@ -13,39 +13,51 @@ if (!fs.existsSync(input)) {
   process.exit(1)
 }
 
-// SVG sobreposto: "KsF" vermelho, sombra/glow forte, leve escurecimento nas bordas
+// SVG sobreposto: "KsF" como fumaça vermelha translúcida (~50%), bordas difusas
 function overlaySVG(size) {
   const fontSize = Math.round(size * 0.42)
   const cx = size / 2
   const cy = size / 2
+  const blurSoft = (size * 0.012).toFixed(1)   // desfoque do texto (esfumaçado)
+  const blurHaze = (size * 0.05).toFixed(1)    // névoa/glow largo atrás
   return Buffer.from(`
   <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
     <defs>
-      <!-- Glow/sombra vermelha em volta das letras -->
-      <filter id="redShadow" x="-40%" y="-40%" width="180%" height="180%">
-        <feDropShadow dx="0" dy="${Math.round(size*0.012)}" stdDeviation="${Math.round(size*0.02)}" flood-color="#000000" flood-opacity="0.85"/>
-        <feDropShadow dx="0" dy="0" stdDeviation="${Math.round(size*0.03)}" flood-color="#e11d48" flood-opacity="0.6"/>
+      <!-- Desfoque suave das letras: aspecto de fumaça -->
+      <filter id="smoke" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="${blurSoft}"/>
       </filter>
-      <!-- Gradiente vermelho nas letras pra dar volume -->
-      <linearGradient id="redFill" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#fb3a5d"/>
-        <stop offset="55%" stop-color="#e11d48"/>
-        <stop offset="100%" stop-color="#9f1239"/>
+      <!-- Névoa larga e difusa atrás (a "fumaça" se espalhando) -->
+      <filter id="haze" x="-80%" y="-80%" width="260%" height="260%">
+        <feGaussianBlur stdDeviation="${blurHaze}"/>
+      </filter>
+      <!-- Gradiente vertical avermelhado, tom de brasa -->
+      <linearGradient id="redSmoke" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#ff4d6d"/>
+        <stop offset="60%" stop-color="#e11d48"/>
+        <stop offset="100%" stop-color="#b11236"/>
       </linearGradient>
-      <!-- Vinheta: escurece as bordas pra logo destacar -->
+      <!-- Vinheta leve pra dar profundidade -->
       <radialGradient id="vignette" cx="50%" cy="50%" r="75%">
-        <stop offset="55%" stop-color="#000000" stop-opacity="0"/>
-        <stop offset="100%" stop-color="#000000" stop-opacity="0.55"/>
+        <stop offset="60%" stop-color="#000000" stop-opacity="0"/>
+        <stop offset="100%" stop-color="#000000" stop-opacity="0.45"/>
       </radialGradient>
     </defs>
 
     <rect width="${size}" height="${size}" fill="url(#vignette)"/>
 
+    <!-- Camada 1: névoa vermelha bem difusa (a fumaça espalhada) -->
     <text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="central"
           font-family="Arial Black, Arial, sans-serif" font-weight="900"
-          font-size="${fontSize}" fill="url(#redFill)"
-          stroke="#4c0519" stroke-width="${Math.round(size*0.006)}"
-          filter="url(#redShadow)"
+          font-size="${fontSize}" fill="#ff1f47"
+          filter="url(#haze)" opacity="0.4"
+          letter-spacing="${Math.round(size*0.005)}">KsF</text>
+
+    <!-- Camada 2: as letras esfumaçadas, ~50% de transparência -->
+    <text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="central"
+          font-family="Arial Black, Arial, sans-serif" font-weight="900"
+          font-size="${fontSize}" fill="url(#redSmoke)"
+          filter="url(#smoke)" opacity="0.5"
           letter-spacing="${Math.round(size*0.005)}">KsF</text>
   </svg>`)
 }
