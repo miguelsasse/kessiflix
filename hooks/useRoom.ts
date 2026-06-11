@@ -25,7 +25,13 @@ export function useRoom(roomId: string) {
     socketRef.current = socket
 
     const userId = Math.random().toString(36).slice(2)
-    socket.emit('join-room', { roomId, userId })
+
+    // Entra na sala AGORA e também a cada (re)conexão. Cobre o caso de a
+    // conexão cair (iPhone em background, troca de rede) e voltar — sem isso,
+    // depois de uma queda o servidor não sabe mais que você está na sala.
+    const join = () => socket.emit('join-room', { roomId, userId })
+    if (socket.connected) join()
+    socket.on('connect', join)
 
     socket.on('room-joined', ({ partnerConnected, videoUrl: url, state, yourIndex }) => {
       setIsInitiator(yourIndex === 0)
@@ -64,6 +70,7 @@ export function useRoom(roomId: string) {
     })
 
     return () => {
+      socket.off('connect', join)
       socket.off('room-joined')
       socket.off('room-ready')
       socket.off('room-full')
